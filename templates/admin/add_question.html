@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Question</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            margin-right: 5%;
+        }
+        form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+        label {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            font-size: 1.2em;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        button:active {
+            transform: scale(1);
+        }
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add New Question</h1>
+    <form method="POST">
+        <label for="question_text">Question Text:</label>
+        <input type="text" id="question_text" name="question_text" required><br>
+
+        <label for="option_1">Option 1:</label>
+        <input type="text" id="option_1" name="option_1" required><br>
+
+        <label for="option_2">Option 2:</label>
+        <input type="text" id="option_2" name="option_2" required><br>
+
+        <label for="option_3">Option 3:</label>
+        <input type="text" id="option_3" name="option_3" required><br>
+
+        <label for="option_4">Option 4:</label>
+        <input type="text" id="option_4" name="option_4" required><br>
+
+        <label for="correct_answer">Correct Answer:</label>
+        <input type="text" name="correct_answer" required><br> 
+
+        <label for="difficulty">Difficulty:</label>
+        <input type="text" id="difficulty" name="difficulty"><br>
+
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category"><br>
+
+        <button type="submit">Save Question</button>
+    </form>
+</body>
+</html>

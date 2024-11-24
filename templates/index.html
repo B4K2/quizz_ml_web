@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        /* Global styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        /* General container styling */
+        #start-container, #quiz-container, #results-container {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 420px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        #quiz-container, #results-container {
+            display: none;
+        }
+
+        /* Input and button styles */
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1.1em;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background-color: #b0c4de;
+            cursor: not-allowed;
+        }
+
+        /* Option buttons */
+        .option {
+            background-color: #e0e0e0;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background-color: #dcdcdc;
+        }
+
+        .selected {
+            border: 2px solid #666;
+        }
+
+        .correct-answer {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .incorrect-answer {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* Score and streak */
+        #score, #streak {
+            font-size: 1.2em;
+            margin-top: 15px;
+            color: #333;
+        }
+
+        /* Feedback and analysis */
+        #feedback, #analysis {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            input[type="text"], button {
+                width: 100%;
+            }
+
+            #start-container, #quiz-container, #results-container {
+                padding: 20px;
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        window.onload = async function() {
+            document.getElementById("quiz-container").style.display = "none"; // Hide quiz on load
+        };
+
+        let previousQuestions = [];
+        let userData = {
+            user_id: null,
+            score: 0,
+            correct_answers: 0,
+            incorrect_answers: 0,
+            user_streak: 0,
+            last_difficulty: "easy",
+            time_taken: 45,
+            is_correct: 0
+        };
+
+        async function startQuiz() {
+            const username = document.getElementById("username").value || "anonymous"; // Use 'anonymous' if empty
+
+            const response = await fetch('http://127.0.0.1:5000/start_quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+
+            const data = await response.json();
+
+            if (data.user_id) {
+                userData.user_id = data.user_id;
+                document.getElementById("start-container").style.display = "none"; // Hide start container
+                document.getElementById("quiz-container").style.display = "block"; // Show quiz container
+                loadQuestion(); // Load the first question
+            } else {
+                alert('Failed to get user ID');
+            }
+        }
+
+        async function loadQuestion() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/next_question', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...userData,
+                        previous_questions: previousQuestions
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                if (data.predicted_difficulty) {
+                    userData.last_difficulty = data.predicted_difficulty;
+                }
+
+                previousQuestions.push(data.question_id);
+
+                document.getElementById('question-text').textContent = data.question_text;
+                const optionsContainer = document.getElementById('options');
+                optionsContainer.innerHTML = '';
+
+                data.options.forEach(option => {
+                    const optionElement = document.createElement('button');
+                    optionElement.textContent = option;
+                    optionElement.classList.add('option');
+                    optionElement.value = option;
+                    optionElement.onclick = selectOption;
+                    optionsContainer.appendChild(optionElement);
+                });
+
+                document.getElementById("correct_answer").value = data.correct_answer.trim();
+                document.getElementById('submit-btn').disabled = false;
+
+            } catch (error) {
+                console.error('Error loading question:', error);
+                alert('Failed to load the next question.');
+            }
+        }
+
+        function selectOption(event) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        async function submitAnswer() {
+            const selectedOption = document.querySelector('.option.selected');
+            if (!selectedOption) {
+                alert("Please select an option.");
+                return;
+            }
+
+            const userAnswer = selectedOption.value;
+            const correctAnswer = document.getElementById("correct_answer").value.trim();
+            userData.is_correct = (userAnswer === correctAnswer) ? 1 : 0;
+
+            const response = await fetch('http://127.0.0.1:5000/submit_answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userData.user_id,
+                    selected_answer: userAnswer,
+                    correct_answer: correctAnswer,
+                    is_correct: userData.is_correct
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.message === "Answer recorded") {
+                document.getElementById("score").textContent = `Score: ${result.score}`;
+                document.getElementById("streak").textContent = `Streak: ${result.streak}`;
+                userData.score = result.score;
+                userData.correct_answers = result.correct_answers;
+                userData.incorrect_answers = result.incorrect_answers;
+                userData.user_streak = result.streak;
+
+                if (userData.is_correct) {
+                    selectedOption.classList.add('correct-answer');
+                } else {
+                    selectedOption.classList.add('incorrect-answer');
+                    document.querySelectorAll('.option').forEach(option => {
+                        if (option.value === correctAnswer) {
+                            option.classList.add('correct-answer');
+                        }
+                    });
+                }
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+
+            setTimeout(loadQuestion, 1500);
+        }
+
+        async function endQuiz() {
+    if (!userData.user_id) {
+        alert("User ID is missing. Please start a new quiz.");
+        return;
+    }
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/end_quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userData.user_id })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            document.getElementById("quiz-container").style.display = "none";
+            document.getElementById("results-container").style.display = "block";
+
+            const feedbackDiv = document.getElementById("feedback");
+            feedbackDiv.innerHTML = "<strong>Feedback:</strong><br>" + result.feedback.join("<br>");
+
+            const analysisDiv = document.getElementById("analysis");
+            analysisDiv.innerHTML = "<strong>Analysis:</strong><br>";
+            result.analysis.forEach(item => {
+                analysisDiv.innerHTML += `Username: ${item.username}<br> ${item.analysis}<br><br>`;
+            });
+
+            // Display the graph
+            if (result.graph) {
+                const graphDiv = document.getElementById("graph");
+                graphDiv.innerHTML = `<strong>Graph:</strong><br><img src="data:image/png;base64,${result.graph}">`;
+            }
+
+        } else {
+            alert(`Error: ${result.error}`);
+        }
+    } catch (error) {
+        alert("Failed to end quiz. Please try again.");
+    }
+}
+
+    </script>
+</head>
+<body>
+    <div id="start-container">
+        <label for="username">Enter Username:</label>
+        <input type="text" id="username" placeholder="Username">
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+    <div id="quiz-container">
+        <h2 id="question-text">Loading...</h2>
+        <div id="options"></div>
+        <button id="submit-btn" onclick="submitAnswer()" disabled>Submit</button>
+        <input type="hidden" id="correct_answer">
+        <div id="score">Score: 0</div>
+        <div id="streak">Streak: 0</div>
+        <button id="end-btn" onclick="endQuiz()">End Quiz</button>
+    </div>
+    <div id="results-container">
+        <h3>Quiz Summary</h3>
+        <div id="feedback"></div>
+        <div id="analysis"></div>
+    </div>
+    <div id="graph"></div>
+</body>
+</html>

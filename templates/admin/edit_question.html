@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Question</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+    
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+    
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+    
+        label {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            display: block;
+            color: #333;
+        }
+    
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+    
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+    
+        button {
+            background-color: #007bff;
+            color: white;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+    
+        button:hover {
+            background-color: #0056b3;
+        }
+    
+        .form-group {
+            margin-bottom: 20px;
+        }
+    
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+    
+        .back-button {
+            display: inline-block;
+            background-color: #28a745;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+    
+        .back-button:hover {
+            background-color: #218838;
+        }
+    </style>
+    
+</head>
+<body>
+    <h1>Edit Question</h1>
+    <form method="POST">
+        <label for="question_text">Question Text:</label>
+        <input type="text" name="question_text" value="{{ question.question_text }}" required><br>
+
+        <label for="option_1">Option 1:</label>
+        <input type="text" name="option_1" value="{{ question.option_1 }}" required><br>
+
+        <label for="option_2">Option 2:</label>
+        <input type="text" name="option_2" value="{{ question.option_2 }}" required><br>
+
+        <label for="option_3">Option 3:</label>
+        <input type="text" name="option_3" value="{{ question.option_3 }}" required><br>
+
+        <label for="option_4">Option 4:</label>
+        <input type="text" name="option_4" value="{{ question.option_4 }}" required><br>
+
+        <label for="correct_answer">Correct Answer:</label>
+        <input type="text" name="correct_answer" value="{{ question.correct_answer }}" required><br>
+
+        <label for="difficulty">Difficulty:</label>
+        <input type="text" name="difficulty" value="{{ question.difficulty }}" required><br>
+
+        <label for="category">Category:</label>
+        <input type="text" name="category" value="{{ question.category }}" required><br>
+
+        <button type="submit">Update Question</button>
+    </form>
+</body>
+</html>
